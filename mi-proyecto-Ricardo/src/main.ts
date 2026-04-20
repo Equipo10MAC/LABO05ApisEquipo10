@@ -112,9 +112,10 @@ const createNewPost = async (): Promise<void> => {
 // PISTA A: Crea la interfaz 'Comment'. 
 // Recuerda que la API devuelve: postId, id, name, email y body.
 interface Comment {
-  userId: number;   // ID del autor (numérico)
+  postId: number;   // ID del autor (numérico)
   id: number;       // ID único del post (numérico)
-  title: string;    // Título del post (texto)
+  name: string;     // Nombre del autor del comentario (texto)
+  email: string;    // Título del post (texto)
   body: string;     // Contenido del post (texto)
 }
 /**
@@ -162,6 +163,7 @@ const fetchCommentsByPost = async (postId: number): Promise<void> => {
     data.forEach((comment) => {
       console.log(`El mail del comentario con id: ${comment.id} es: ${comment.email}`);
     });
+    
   
 
   } catch (error) {
@@ -191,32 +193,44 @@ const fetchCommentsByPost = async (postId: number): Promise<void> => {
  * PASO 1: CONFIGURACIÓN DE CONEXIÓN
  * Sustituye estos valores con los de tu proyecto en Supabase (Project Settings > API)
  */
-const SUPABASE_URL: string = "TU_URL_DE_SUPABASE";
-const SUPABASE_KEY: string = "TU_KEY";
+const SUPABASE_URL: string = "https://ocdszexscqnhidlvxhie.supabase.co";
+const SUPABASE_KEY: string = "sb_publishable_1-m3WmKFinpvZHtdeKxroA_T-cQd3F6";
 
 /**
  * PASO 2: INICIALIZACIÓN DEL CLIENTE
  * Creamos el objeto que nos permite hablar con la base de datos.
  */
-
+import { createClient } from '@supabase/supabase-js';
 // DESCOMENTAR LA LINEA DE ABAJO
-// const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
+const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
 /**
  * PASO 3: INTERFAZ DE DATOS
  * Definimos la estructura exacta de la tabla que vemos en tu imagen.
  */
+/*
 interface Auto {
   id_auto: number;       // Columna ID (Primary Key)
   patente: string;       // Columna Patente (Varchar)
   id_propietario: number; // Columna ID Propietario (Foreign Key)
 }
-
+*/
+interface Comentario {
+  id_comentario: number;
+  contenido: string;
+  fecha_comentario: string; // Supabase lo devuelve como string (ISO timestamp)
+  id_usuario: number;
+  id_publicacion: number;
+}
 /**
  * PASO 4: LA FUNCIÓN DE LECTURA (GET)
  * Esta función entra a la base de datos y trae los registros.
  */
-const getAutos = async (): Promise<void> => {
+const getComentario = async (): Promise<void> => {
+
+  if (IS_DEBUG_MODE) {
+    console.log(`%c [LAB 4] Se muestra la tabla comentarios del proyecto supabase`, "color: yellow; font-weight: bold;");
+  }
   
   // Realizamos la consulta: 
   // 1. .from('autos') -> Selecciona la tabla de tu imagen.
@@ -224,26 +238,23 @@ const getAutos = async (): Promise<void> => {
 
   // DESCOMENTAR ESTAS LINEAS QUE SIGUEN
 
-  /*const { data, error } = await supabase
-    .from('autos')   
+  const { data, error } = await supabase
+    .from('comentario')   
     .select('*');
 
   // Si Supabase responde con un error (ej: tabla inexistente o sin permisos RLS)
   if (error) {
-    console.error("❌ Error al obtener los autos:", error.message);
+    console.error("❌ Error al obtener los comentarios:", error.message);
     return;
   }
 
   // Si todo sale bien, 'data' contiene el array de objetos.
   // Usamos 'as Auto[]' para decirle a TS que confíe en nuestra interfaz.
-  const listaAutos: Auto[] = data as Auto[];
+  const listaComentarios: Comentario[] = data as Comentario[];
 
   // Mostramos el resultado final en la consola del navegador
-  console.log("✅ Lista de autos recibida:");
-  console.table(listaAutos); 
-
-  HASTA AQUI DEBES DESCOMENTAR
-  */ 
+  console.log("✅ Lista de comentarios recibida:");
+  console.table(listaComentarios); 
 };
 
 
@@ -263,7 +274,7 @@ const runLaboratory = async () => {
   await fetchSinglePost(POST_ID_TO_SEARCH); 
   await createNewPost();    
   await fetchCommentsByPost(POST_ID_TO_SEARCH);
-  //await getAutos();                
+  await getComentario();                
   
   console.log("%c --- EXPERIMENTO FINALIZADO ---", "background: #222; color: #bada55; padding: 5px;");
 };
